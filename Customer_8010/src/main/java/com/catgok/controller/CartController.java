@@ -1,44 +1,49 @@
 package com.catgok.controller;
 
 import com.catgok.entity.User;
+import com.catgok.feign.UserFeignService;
+import com.catgok.loadblance.CustomLoadBalanceConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/cart")
+@LoadBalancerClient(name = "provider", configuration = CustomLoadBalanceConfiguration.class)
 public class CartController {
     @Autowired
-    private RestTemplate restTemplate;
-    @Autowired
-    private DiscoveryClient discoveryClient;
+    private UserFeignService userFeignService;
 
     @GetMapping("/hello")
     public String hello() {
-        List<ServiceInstance> instanceList = discoveryClient.getInstances("PROVIDER");
-        ServiceInstance instance = instanceList.get(0);
-        return restTemplate.getForObject("http://" + instance.getHost() + ":" +
-                        instance.getPort() + "/user/hello",
-                String.class
-        );
+        return userFeignService.hello();
     }
 
     @GetMapping("/addCart/{userId}")
     public User addCart(@PathVariable Integer userId) {
-        List<ServiceInstance> instanceList = discoveryClient.getInstances("PROVIDER");
-        ServiceInstance serviceInstance = instanceList.get(0);
-        User result = restTemplate.getForObject(
-                "http://" + serviceInstance.getHost() + ":" +
-                        serviceInstance.getPort() + "/user/getUserById/" + userId.toString(),
-                User.class
-        );
-        return result;
+        return userFeignService.getUserById(userId);
+    }
+
+    @GetMapping("/get")
+    public String get() {
+        return userFeignService.get();
+    }
+
+    @GetMapping("/post")
+    public String post() {
+        return userFeignService.post();
+    }
+
+    @GetMapping("/put")
+    public String put() {
+        return userFeignService.put();
+    }
+
+    @GetMapping("/delete")
+    public String delete() {
+        return userFeignService.delete();
     }
 }
