@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping("/cart")
 @LoadBalancerClient(name = "provider", configuration = CustomLoadBalanceConfiguration.class)
@@ -23,8 +25,22 @@ public class CartController {
     }
 
     @GetMapping("/addCart/{userId}")
-    public User addCart(@PathVariable Integer userId) {
-        return userFeignService.getUserById(userId);
+    public CompletableFuture<User> addCart(@PathVariable Integer userId) throws InterruptedException {
+        System.out.println("进入方法");
+        CompletableFuture<User> result = CompletableFuture.supplyAsync(() -> {
+            return userFeignService.getUserById(userId);
+        });
+        System.out.println("离开方法");
+        return result;
+    }
+
+    public CompletableFuture<User> addCartFallBack(@PathVariable Integer userId, Throwable e) {
+        e.printStackTrace();
+        System.out.println("调用fallback");
+        CompletableFuture<User> result = CompletableFuture.supplyAsync(() -> {
+            return new User(400, "用户服务错误", "");
+        });
+        return result;
     }
 
     @GetMapping("/get")
