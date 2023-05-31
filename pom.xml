@@ -16,6 +16,9 @@
         <module>Eureka_8761</module>
         <module>Eureka_8762</module>
         <module>Gateway_18010</module>
+        <module>Config_16010</module>
+        <module>Config_16011</module>
+        <module>Config_16012</module>
     </modules>
 
     <dependencyManagement><!-- 父工程里面生成的依赖 子项目可以直接用 -->

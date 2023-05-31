@@ -1,14 +1,20 @@
 package com.catgok.controller;
 
 import com.catgok.entity.User;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RefreshScope
 @RequestMapping("/user")
 public class UserController {
+    @Value("${msg}")
+    private String msg;
+
     @GetMapping("/hello")
     public String hello() {
-        return "Hello World";
+        return "Hello World! " + msg;
     }
 
     @GetMapping("/getUserById/{id}")
